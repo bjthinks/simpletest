@@ -37,7 +37,9 @@ testSylow g minIndex ((p,e),ns) =
   if maxSylow == 1
   then stop $ "normal Sylow " ++ show p ++ "-subgroup"
   else if maxSylow < minIndex
-       then stop $ "<= " ++ show maxSylow ++ " Sylow " ++ show p ++ "-subgroups, and " ++ show g ++ " does not divide " ++ show maxSylow ++ "!/2"
+       then stop $ "<= " ++ show maxSylow ++ " Sylow " ++ show p ++
+            "-subgroups, and " ++ show g ++ " does not divide " ++
+            show maxSylow ++ "!/2"
        else return ()
   where
     maxSylow = last ns
