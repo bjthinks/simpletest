@@ -59,6 +59,9 @@ simpletest g = do
       -- reverse should be removed, testing output matches old C program
       primePowersAndSylow = reverse $ zip factorization sylow
   sequence $ map (testSylow g minIndex) primePowersAndSylow
+  if g `mod` 4 == 2
+    then stop "subgroup of index 2 (order is 2 * odd)"
+    else return ()
   let filteredSylow = map (filter (>=minIndex)) sylow
   nl
 
