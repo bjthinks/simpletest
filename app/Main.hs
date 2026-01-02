@@ -3,4 +3,5 @@ module Main where
 import Primes
 
 main :: IO ()
-main = sequence_ $ map (putStrLn . show) (primes :: [Int])
+main = do
+  print $ (primes :: [Int]) !! 1000000
