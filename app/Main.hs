@@ -1,4 +1,6 @@
 module Main where
 
+import Primes
+
 main :: IO ()
-main = putStrLn "Hello, Haskell!"
+main = sequence_ $ map (putStrLn . show) (primes :: [Int])
