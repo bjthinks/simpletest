@@ -32,6 +32,16 @@ sylowNumber g (p,e) =
        then return candidate
        else []
 
+testSylow :: Int -> Int -> ((Int,Int),[Int]) -> MaybeT (Writer String) ()
+testSylow g minIndex ((p,e),ns) =
+  if maxSylow == 1
+  then stop $ "normal Sylow " ++ show p ++ "-subgroup"
+  else if maxSylow < minIndex
+       then stop $ "<= " ++ show maxSylow ++ " Sylow " ++ show p ++ "-subgroups, and " ++ show g ++ " does not divide " ++ show maxSylow ++ "!/2"
+       else return ()
+  where
+    maxSylow = last ns
+
 simpletest :: Int -> MaybeT (Writer String) ()
 simpletest g = do
   tell $ show g ++ "\t"
@@ -44,7 +54,10 @@ simpletest g = do
     else return ()
   let minIndex = computeMinIndex g 3
       sylow = sylowNumbers g factorization
-  tell $ show sylow
+      -- reverse should be removed, testing output matches old C program
+      primePowersAndSylow = reverse $ zip factorization sylow
+  sequence $ map (testSylow g minIndex) primePowersAndSylow
+  let filteredSylow = map (filter (>=minIndex)) sylow
   nl
 
 main :: IO ()
