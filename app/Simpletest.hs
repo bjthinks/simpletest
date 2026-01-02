@@ -3,6 +3,7 @@ module Main where
 import Control.Monad
 import Control.Monad.Trans.Maybe
 import Control.Monad.Writer
+import Data.List
 
 import TrialDivide
 
@@ -33,7 +34,7 @@ sylowNumber g (p,e) =
        else []
 
 testSylow :: Int -> Int -> ((Int,Int),[Int]) -> MaybeT (Writer String) ()
-testSylow g minIndex ((p,e),ns) =
+testSylow g minIndex ((p,_),ns) =
   if maxSylow == 1
   then stop $ "normal Sylow " ++ show p ++ "-subgroup"
   else if maxSylow < minIndex
@@ -43,6 +44,12 @@ testSylow g minIndex ((p,e),ns) =
        else return ()
   where
     maxSylow = last ns
+
+numElementsOfOrder :: ((Int,Int),[Int]) -> Int
+numElementsOfOrder ((p,e),nps) =
+  if e == 1
+  then (p-1) * (head nps)
+  else p^e
 
 simpletest :: Int -> MaybeT (Writer String) ()
 simpletest g = do
@@ -58,12 +65,29 @@ simpletest g = do
       sylow = sylowNumbers g factorization
       -- reverse should be removed, testing output matches old C program
       primePowersAndSylow = reverse $ zip factorization sylow
-  sequence $ map (testSylow g minIndex) primePowersAndSylow
+  sequence_ $ map (testSylow g minIndex) primePowersAndSylow
   if g `mod` 4 == 2
     then stop "subgroup of index 2 (order is 2 * odd)"
     else return ()
   let filteredSylow = map (filter (>=minIndex)) sylow
-  nl
+      betterPrimePowersAndSylow = zip factorization filteredSylow
+  -- stupid should be changed to naive
+  let elts = 1 + (sum $ map numElementsOfOrder $ betterPrimePowersAndSylow)
+  if elts > g
+    then stop "Too many elements in Sylow subgroups (\"stupid\" element counting)"
+    else return ()
+  line "***** FAILED *****"
+  line "You need to deal with this:"
+  let prettyPowers = map (\(p,e) -> case e of
+                             1 -> show p
+                             _ -> show p ++ "^" ++ show e) factorization
+      prettyFactorization = intercalate " * " prettyPowers
+  line $ "\t" ++ show g ++ " = " ++ prettyFactorization
+  line $ "\tMinimal subgroup index = " ++ show minIndex
+  line "\tPossible Sylow numbers:"
+  let showSylow ((p,_),nps) = "\tn_" ++ show p ++ " = " ++
+        intercalate ", " (map show nps)
+  sequence_ $ map (line . showSylow) betterPrimePowersAndSylow
 
 main :: IO ()
 main = putStr $ execWriter $ sequence $ map (runMaybeT . simpletest) [2..10000]
