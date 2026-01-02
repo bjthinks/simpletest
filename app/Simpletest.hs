@@ -63,16 +63,18 @@ simpletest g = do
     else return ()
   let minIndex = computeMinIndex g 3
       sylow = sylowNumbers g factorization
-      primePowersAndSylow = zip factorization sylow
+      -- reverse should be removed, testing output matches old C program
+      primePowersAndSylow = reverse $ zip factorization sylow
   sequence_ $ map (testSylow g minIndex) primePowersAndSylow
   if g `mod` 4 == 2
     then stop "subgroup of index 2 (order is 2 * odd)"
     else return ()
   let filteredSylow = map (filter (>=minIndex)) sylow
       betterPrimePowersAndSylow = zip factorization filteredSylow
+  -- stupid should be changed to naive
   let elts = 1 + (sum $ map numElementsOfOrder $ betterPrimePowersAndSylow)
   if elts > g
-    then stop "Too many elements in Sylow subgroups (naive element counting)"
+    then stop "Too many elements in Sylow subgroups (\"stupid\" element counting)"
     else return ()
   line "***** FAILED *****"
   line "You need to deal with this:"
