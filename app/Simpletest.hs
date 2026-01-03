@@ -2,7 +2,7 @@ module Main where
 
 import Control.Monad
 import Control.Monad.Trans.Maybe
-import Control.Monad.Writer
+import Control.Monad.Writer.Strict
 import Data.List
 
 import TrialDivide
